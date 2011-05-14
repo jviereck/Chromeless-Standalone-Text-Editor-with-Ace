@@ -1,5 +1,5 @@
 const ui = require("ui");
-var menu = require("menu");
+const menu = require("menu");
 
 var editor = null;
 var editorSession = null;
@@ -17,14 +17,14 @@ window.onload = function() {
 // http://groups.google.com/group/ace-discuss/msg/3d10daf9bd019b3d
 saveFile = function () {
     var data = editorSession.getValue();
-    //    require("file").write(currentFile, data);
-    var stream = require("file").open(currentFile, "w");
-    try {
-        stream.write(data);
-    }
-    finally {
-        stream.close();
-    }
+    require("file").writeAsync(currentFile, data, true, function(err) {
+        if (err) {
+            console.log("Error while writing file", err);
+            alert("Can't save file.")
+        } else {
+            console.log("File written to output async!");
+        }
+    });
 }
 
 openFile = function () {
@@ -39,11 +39,15 @@ openFile = function () {
             return;
         }
         console.log("you picked " + x.length + " files");
-        for (var i = 0; i < x.length; i++) {
-            currentFile = "" + x[i];
-            stringData = require("file").read(currentFile);
-            editorSession.setValue(stringData);
-        }
+        currentFile = "" + x[0];
+        require("file").readAsync(currentFile, function(err, data) {
+            if (err) {
+                console.log("Error while reading file", currentFile, ":", err);
+                alert("Can't open file.");
+                return;
+            }
+            editorSession.setValue(data);
+        });
     });
 }
 
